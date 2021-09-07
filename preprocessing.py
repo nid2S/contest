@@ -1,9 +1,9 @@
-import tensorflow as tf
-import pandas as pd
-import re
 import os
+import re
+import pandas as pd
 from hgtk.text import decompose
-from sklearn.model_selection import train_test_split
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.utils import to_categorical
 
 
 class Preprocesser:
@@ -24,25 +24,47 @@ class Preprocesser:
         self.train = pd.read_csv("./dataset/train_data.csv")
         self.test = pd.read_csv("./dataset/test_data.csv")
 
+        # make word_vocab + train preprocessing
+        word_vocab = set()
+        self.train["encoded_title"] = []
+        for i, title in self.train["title"].items():
+            title = decompose(re.sub(r'/W', r' ', title.lower()), compose_code="")
+            self.train["encoded_title"].values[i] = [char for char in title]
+            for char in title:
+                word_vocab.add(char)
+
+        # test preprocessing
+        self.test["encoded_title"] = []
+        for i, title in self.test["title"].items():
+            title = decompose(re.sub(r'/W', r' ', title.lower()), compose_code="")
+            self.test["encoded_title"].values[i] = [char for char in title]
+
+        # set word_vocab
+        self.word_to_index = dict([(char, i+1) for i, char in enumerate(sorted(list(word_vocab)))])
+        self.word_to_index["OOV"] = len(self.word_to_index)+1
+
+
+        # get max_len, padding, to_categorical
+        self.max_len = max([len(encoded_title) for encoded_title in self.train["encoded_title"].values])
+        self.train["encoded_title"].values = pad_sequences(self.train["encoded_title"].values, maxlen=self.pad_len, padding="post")
+        self.train["encoded_title"].values = to_categorical(self.train["encoded_title"].values)
+        self.test["encoded_title"].values = pad_sequences(self.test["encoded_title"].values, maxlen=self.pad_len, padding="post")
+        self.test["encoded_title"].values = to_categorical(self.test["encoded_title"].values)
+
     def preprocessing(self, text: str) -> list[list[list[str]]]:
-        # sent > word > char(one-hot encoded)
+        # [sent > char(one-hot encoded)]
         # 소문자화, 비문자(한자는 남음)제거, 자모단위로 분리 후 리스트로 분리
-        text = decompose(re.sub(r'/W', r' ', text.lower()), "")
-        text = [[char for char in word] for word in text.split()]
+        text = decompose(re.sub(r'/W', r' ', text.lower()), compose_code="")
+        text = [char for char in text]
 
         encoded_text = []
-        for word in text:
-            encoded_word = []
-            for char in word:
-                try:
-                    encoded_word.append(self.word_to_index[char])
-                except KeyError:
-                    encoded_word.append(self.word_to_index["OOV"])
-            encoded_text.append(encoded_word)
+        for char in text:
+            try:
+                encoded_text.append(self.word_to_index[char])
+            except KeyError:
+                encoded_text.append(self.word_to_index["OOV"])
 
-        encoded_text = tf.keras.preprocessing.sequence.pad_sequences(encoded_text, maxlen=self.pad_len)
-        encoded_text = tf.keras.utils.to_categorical(encoded_text)
+        encoded_text = pad_sequences([encoded_text], maxlen=self.pad_len, padding="post")
+        encoded_text = to_categorical(encoded_text)
 
         return encoded_text
-
-

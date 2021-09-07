@@ -20,7 +20,6 @@
 - RNN/CNN/Transformer(Attention)
 - optimizer order
 - batch_size
-- S2S_Encoder layer_num
 - CNN kernel num/size
 - RNN/BiRNN
 - Embedding/Non-Embedding(FastText)
