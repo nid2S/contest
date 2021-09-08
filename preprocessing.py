@@ -37,7 +37,7 @@ class Preprocesser:
         self.word_to_index["OOV"] = len(self.word_to_index)+1
 
         # train preprocessing
-        self.train["encoded_title"] = []
+        self.train["encoded_title"] = ""
         for i, title in self.train["title"].items():
             title = decompose(re.sub(r'/W', r' ', title.lower()), compose_code="")
             title = re.sub(f"[{punctuation}]", "", title)
@@ -50,7 +50,7 @@ class Preprocesser:
             self.train["encoded_title"].values[i] = encoded_text
 
         # test preprocessing
-        self.test["encoded_title"] = []
+        self.test["encoded_title"] = ""
         for i, title in self.test["title"].items():
             title = decompose(re.sub(r'/W', r' ', title.lower()), compose_code="")
             title = re.sub(f"[{punctuation}]", "", title)
@@ -62,15 +62,21 @@ class Preprocesser:
                     encoded_text.append(self.word_to_index["OOV"])
             self.test["encoded_title"].values[i] = encoded_text
 
-        # get pad_len, padding, to_categorical
-        self.pad_len = max([len(encoded_title) for encoded_title in self.train["encoded_title"].values])
-        self.train["encoded_title"].values = pad_sequences(self.train["encoded_title"].values, maxlen=self.pad_len, padding="post")
-        self.train["encoded_title"].values = to_categorical(self.train["encoded_title"].values)
-        self.test["encoded_title"].values = pad_sequences(self.test["encoded_title"].values, maxlen=self.pad_len, padding="post")
-        self.test["encoded_title"].values = to_categorical(self.test["encoded_title"].values)
+        # get pad_len
+        self.pad_len = max([len(encoded_title) for encoded_title in self.train["encoded_title"].values])  # 96
+        # train padding, one-hot encoding
+        pad = pad_sequences(self.train["encoded_title"].values, maxlen=self.pad_len, padding="post")
+        one_hot_encoded = to_categorical(pad)
+        for i, one_hot_vec in enumerate(one_hot_encoded):
+            self.train["encoded_title"].values[1] = one_hot_vec
+        # train padding, one-hot encoding
+        pad = pad_sequences(self.test["encoded_title"].values, maxlen=self.pad_len, padding="post")
+        one_hot_encoded = to_categorical(pad)
+        for i, one_hot_vec in enumerate(one_hot_encoded):
+            self.test["encoded_title"].values[1] = one_hot_vec
 
     def preprocessing(self, text: str) -> list[list[list[str]]]:
-        # [sent > char(one-hot encoded)]
+        # return : [[char(one-hot encoded)]]
         # 소문자화, 비문자(한자는 남음)제거, 구두점 제거, 자모단위로 분리 후 리스트로 분리
         # 정수인코딩, 패딩, 원-핫 인코딩
         text = decompose(re.sub(r'/W', r' ', text.lower()), compose_code="")
