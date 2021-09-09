@@ -5,7 +5,7 @@ from string import punctuation
 from hgtk.text import decompose
 
 
-def pad_sequences(encoded_vectors, maxlen: int):
+def pad_sequences(encoded_vectors, maxlen: int) -> list[list[float]]:
     padded_text = []
     for vector in encoded_vectors:
         padded_text.append(vector+([0]*(maxlen-len(vector))))
