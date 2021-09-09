@@ -3,7 +3,13 @@ import re
 import pandas as pd
 from string import punctuation
 from hgtk.text import decompose
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+
+def pad_sequences(encoded_vectors, maxlen: int):
+    padded_text = []
+    for vector in encoded_vectors:
+        padded_text.append(vector+([0]*(maxlen-len(vector))))
+    return padded_text
 
 
 class Preprocesser:
@@ -76,12 +82,12 @@ class Preprocesser:
         self.pad_len = max([len(encoded_title) for encoded_title in train_encoded])  # 96
 
         # train padding, one-hot encoding
-        pad = pad_sequences(train_encoded, maxlen=self.pad_len, padding="post").tolist()
+        pad = pad_sequences(train_encoded, maxlen=self.pad_len)
         self.train_data = self.to_categorical(pad)
         print("train_padding, one-hot encoded")
 
         # train padding, one-hot encoding
-        pad = pad_sequences(test_encoded, maxlen=self.pad_len, padding="post").tolist()
+        pad = pad_sequences(test_encoded, maxlen=self.pad_len)
         self.test_data = self.to_categorical(pad)
         print("complete to dataLoad")
 
@@ -100,7 +106,7 @@ class Preprocesser:
             except KeyError:
                 encoded_text.append(self.word_to_index["OOV"])
 
-        encoded_text = pad_sequences([encoded_text], maxlen=self.pad_len, padding="post")
+        encoded_text = pad_sequences([encoded_text], maxlen=self.pad_len)
         encoded_text = self.to_categorical(encoded_text)
 
         return encoded_text
