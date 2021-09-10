@@ -105,32 +105,28 @@ for batch_size in CNN_hyper_params["batch_size"]:
         for dr in CNN_hyper_params["dr"]:
             for padding in CNN_hyper_params["padding"]:
                 for use_bias in CNN_hyper_params["use_bias"]:
+                    hyper_params = {"batch_size": batch_size, "kernel_size": kernel_size, "dr": dr, "padding": padding, "use_bias": use_bias}
                     time_ = time.time()
-                    (_, accuracy) = CNN(batch_size, kernel_size, dr, padding, use_bias)
+                    (_, accuracy) = CNN(**hyper_params)
                     time_ = time.time() - time_
-                    result.append({"model_type": "CNN", "accuracy": accuracy, "time": time_, "hyper_params":
-                        {"batch_size": batch_size, "kernel_size": kernel_size, "dr": dr,
-                         "padding": padding, "use_bias": use_bias}})
+                    result.append({"model_type": "CNN", "accuracy": accuracy, "time": time_, "hyper_params": hyper_params})
                     if accuracy >= best_accuracy:
                         best_accuracy = accuracy
-                        best_param["CNN"] = {"batch_size": batch_size, "kernel_size": kernel_size, "dr": dr,
-                                             "padding": padding, "use_bias": use_bias}
+                        best_param["CNN"] = hyper_params
 # RNN search
 for batch_size in RNN_hyper_params["batch_size"]:
     for use_bias in RNN_hyper_params["use_bias"]:
         for use_LSTM in RNN_hyper_params["use_LSTM"]:
             for use_attention in RNN_hyper_params["use_attention"]:
                 for bidirectional in RNN_hyper_params["bidirectional"]:
+                    hyper_params = {"batch_size": batch_size, "use_bias": use_bias, "use_LSTM": use_LSTM, "use_attention": use_attention, "bidirectional": bidirectional}
                     time_ = time.time()
-                    (_, accuracy) = RNN(batch_size, use_bias, use_attention, use_LSTM, bidirectional)
+                    (_, accuracy) = RNN(**hyper_params)
                     time_ = time.time() - time_
-                    result.append({"model_type": "RNN", "accuracy": accuracy, "time": time_, "hyper_params":
-                                  {"batch_size": batch_size, "use_bias": use_bias, "use_LSTM": use_LSTM,
-                                   "use_attention": use_attention, "bidirectional": bidirectional}})
+                    result.append({"model_type": "RNN", "accuracy": accuracy, "time": time_, "hyper_params": hyper_params})
                     if accuracy >= best_accuracy:
                         best_accuracy = accuracy
-                        best_param["RNN"] = {"batch_size": batch_size, "use_bias": use_bias, "use_LSTM": use_LSTM,
-                                             "use_attention": use_attention, "bidirectional": bidirectional}
+                        best_param["RNN"] = hyper_params
 
 result.sort_values(["accuracy"], inplace=True, ascending=False)
 
