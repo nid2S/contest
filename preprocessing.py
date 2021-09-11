@@ -25,8 +25,8 @@ class Preprocesser:
         self._get_data()
 
     def _get_data(self):
-        if os.path.isdir("./HTK"):
-            os.chdir("./HKT")
+        if os.path.isdir("./HTK_TopicClassification"):
+            os.chdir("./HKT_TopicClassification")
         if not (os.path.isfile("./dataset/train_data.csv") and os.path.isfile("./dataset/test_data.csv")
                 and os.path.isfile("./dataset/topic_dict.csv")):
             raise FileNotFoundError("Essential data file is NOT existing.")
