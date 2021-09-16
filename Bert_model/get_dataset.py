@@ -1,7 +1,7 @@
 import tensorflow as tf
 import pandas as pd
 
-from transformers import ElectraTokenizerFast, TFElectraForSequenceClassification
+from transformers import ElectraTokenizerFast
 from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 

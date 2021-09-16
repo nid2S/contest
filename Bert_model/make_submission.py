@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 from transformers import ElectraTokenizerFast
 
-
 # make submission
 model = tf.keras.models.load_model("../model/TC_model")
 test_data = pd.read_csv("../dataset/test_data.csv")
