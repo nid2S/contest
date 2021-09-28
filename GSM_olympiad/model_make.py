@@ -130,6 +130,6 @@ for batch_size in RNN_hyper_params["batch_size"]:
 
 result.sort_values(["accuracy"], inplace=True, ascending=False)
 
-with open("./model/result.csv", "w+") as f, open("./model/best_result.csv", "w+") as f1:
+with open("model/result.csv", "w+") as f, open("model/best_result.csv", "w+") as f1:
     f.write(result.__str__())
     f1.write(f1.__str__())

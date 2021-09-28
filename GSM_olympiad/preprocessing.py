@@ -26,16 +26,16 @@ class Preprocesser:
 
     def _get_data(self):
         if os.path.isdir("./HTK_TopicClassification"):
-            os.chdir("./HKT_TopicClassification")
-        if not (os.path.isfile("./dataset/train_data.csv") and os.path.isfile("./dataset/test_data.csv")
-                and os.path.isfile("./dataset/topic_dict.csv")):
+            os.chdir("./contest")
+        if not (os.path.isfile("dataset/train_data.csv") and os.path.isfile("dataset/test_data.csv")
+                and os.path.isfile("dataset/topic_dict.csv")):
             raise FileNotFoundError("Essential data file is NOT existing.")
 
-        self.train_origin = pd.read_csv("./dataset/train_data.csv")  # data_num = 45654
-        self.test_origin = pd.read_csv("./dataset/test_data.csv")  # data_num = 9131
-        self.test_origin["topic_idx"] = pd.read_csv("./dataset/sample_submission.csv")["topic_idx"]  # add label
+        self.train_origin = pd.read_csv("dataset/train_data.csv")  # data_num = 45654
+        self.test_origin = pd.read_csv("dataset/test_data.csv")  # data_num = 9131
+        self.test_origin["topic_idx"] = pd.read_csv("dataset/sample_submission.csv")["topic_idx"]  # add label
         self.index_to_topic = dict([(row["topic_idx"], row["topic"]) for (_, row) in
-                                    pd.read_csv("./dataset/topic_dict.csv").iterrows()])
+                                    pd.read_csv("dataset/topic_dict.csv").iterrows()])
         print("loaded data")
 
         # make word_vocab
