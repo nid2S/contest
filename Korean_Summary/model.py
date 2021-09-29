@@ -7,6 +7,7 @@ from datasets import load_metric
 from typing import List
 import transformers
 import pandas as pd
+import numpy as np
 import torch
 import re
 
@@ -20,8 +21,12 @@ def compute_metrics(eval_pred):
 # declare TrainDataset
 class TrainDataset(Dataset):
     def __init__(self, train_data_):
-        # na제거 후 데이터 저장
-        self.train_data = train_data_.drop(train_data_[train_data_["summary"].isna()].index)
+        # na, 중복 제거 후 데이터 저장
+        # dataset num = 266032
+        train_data_ = train_data_.drop(train_data_[train_data_["summary"].isna()].index)
+        train_data_ = train_data_.drop_duplicates(["summary"])
+        train_data_ = train_data_.drop_duplicates(["text"])
+        self.train_data = train_data_
 
     def __len__(self):
         return len(self.train_data)
@@ -54,8 +59,8 @@ class TrainDataCollator(object):
         result = result.map(lambda text: text[3:] if re.sub(".\. ", "", text[:3]) == "" else text)
         # remove parenthesis
         result = result.map(lambda text: re.sub("\[[^]]*]|\([^)]*\)", "", text))
-        # lower, convert non-korean/english/number to space, strip
-        result = result.map(lambda text: re.sub("[^ㄱ-ㅎㅏ-ㅣ가-힣0-9a-z]", " ", text.lower()).strip())
+        # lower, remove non-korean/english/number/space
+        result = result.map(lambda text: re.sub("[^ㄱ-ㅎㅏ-ㅣ가-힣0-9a-z ]", "", text.lower()))
         # tokenize
         tokened_texts = self.tokenizer(result.to_list(), return_tensors="pt").to(self.device)
 
@@ -63,7 +68,9 @@ class TrainDataCollator(object):
 
 
 # declare bart model
-model = BartModel.from_pretrained(get_pytorch_kobart_model())
+model = BartModel.from_pretrained(get_pytorch_kobart_model())  # model hidden_state = 768
+# TODO 출력층 추가
+
 # load, split data (8:2)
 data = pd.read_csv("D:\\workspace\\Git_project\\contest\\Korean_Summary\\data\\train_data.csv")
 train_data, val_data = train_test_split(data, train_size=0.8, shuffle=True, random_state=1000)
@@ -89,10 +96,11 @@ trainer = Trainer(
     eval_dataset=val_datasets,
     data_collator=train_collator,
     compute_metrics=compute_metrics,
-    callbacks=[EarlyStoppingCallback(early_stopping_patience=4)]
+    callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
 )
 # start train
 trainer.train()
+
 
 # prediction
 class PredictDataset(Dataset):
@@ -103,10 +111,8 @@ class PredictDataset(Dataset):
         return len(self.predict_data)
 
     def __getitem__(self, idx: int):
-        # trian_data's columns = {id, text, summary}
-        _, text, summary = self.train_data.iloc[idx]
-        return {"text": text, "label": summary}
-
+        _, text, _ = self.predict_data.iloc[idx]
+        return {"text": text}
 class PredictDataCollator(object):
     def __init__(self):
         self.tokenizer = get_kobart_tokenizer()
@@ -132,5 +138,45 @@ class PredictDataCollator(object):
 
         return tokened_texts
 
-# 이 후 모델로드 > 트레이너 속성 설정 > 학습 순으로 이뤄짐.
+def predict_sent(sent: str):
+    # load trained model
+    predict_model = BartModel.from_pretrained("D:\\workspace\\Git_project\\contest\\Korean_Summary\\model")
+    tokenizer = get_kobart_tokenizer()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    sent = sent[3:] if re.sub(".\. ", "", sent[:3]) == "" else sent
+    sent = re.sub("\[[^]]*]|\([^)]*\)", "", sent)
+    sent = re.sub("[^ㄱ-ㅎㅏ-ㅣ가-힣0-9a-z ]", "", sent.lower())
+    tokened_sent = tokenizer.encode(sent, return_tensors="pt").to(device)
+
+    predicts = np.argmax(predict_model(tokened_sent), axis=-1)
+    return tokenizer.batch_decode(predicts)
+
+
+def predict_sents(sents: pd.DataFrame):
+    predict_model = BartModel.from_pretrained("D:\\workspace\\Git_project\\contest\\Korean_Summary\\model")
+    predict_datacollator = PredictDataCollator()
+    predict_datasets = PredictDataset(sents)
+
+    predict_args = TrainingArguments(
+        output_dir='/content/drive/MyDrive/A_Rai/outputs/Bert',
+        evaluation_strategy=transformers.EvaluationStrategy.STEPS,
+        per_device_train_batch_size=3,
+        per_device_eval_batch_size=3,
+        num_train_epochs=4,
+        seed=1000,
+        load_best_model_at_end=True,
+    )
+
+    predict_trainer = Trainer(
+        model=predict_model,
+        args=predict_args,
+        train_dataset=train_datasets,
+        eval_dataset=val_datasets,
+        data_collator=predict_datacollator,
+        compute_metrics=compute_metrics,
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
+    )
+
+    return np.argmax(predict_trainer.predict(predict_datasets), axis=-1)
 
