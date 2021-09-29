@@ -66,10 +66,20 @@ class TrainDataCollator(object):
 
         return tokened_texts
 
+class SummaryBartModel(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.tokenizer = get_kobart_tokenizer()
+        self.bart = BartModel.from_pretrained(get_pytorch_kobart_model())
+        self.softmax = torch.nn.Softmax(dim=len(self.tokenizer.get_vocab()))
+
+    def forward(self, x):
+        return self.softmax(self.bart(x)['last_hidden_state'])
+
 
 # declare bart model
-model = BartModel.from_pretrained(get_pytorch_kobart_model())  # model hidden_state = 768
-# TODO 출력층 추가
+model = SummaryBartModel()  # model hidden_state = 768
 
 # load, split data (8:2)
 data = pd.read_csv("D:\\workspace\\Git_project\\contest\\Korean_Summary\\data\\train_data.csv")
