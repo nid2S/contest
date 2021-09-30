@@ -33,11 +33,21 @@ def get_TextMaxLen() -> int:
 # declare TrainDataset
 class TrainDataset(Dataset):
     def __init__(self, train_data_):
-        # na, 중복 제거 후 데이터 저장
         # dataset num = 266032
         train_data_ = train_data_.drop(train_data_[train_data_["summary"].isna()].index)
         train_data_ = train_data_.drop_duplicates(["summary"])
         train_data_ = train_data_.drop_duplicates(["text"])
+        # # for fast training
+        # train_data_ = train_data_[:int(len(train_data_)/10)]
+        # remove Legal provisions (ex - 가. ~~~)
+        train_data_["text"] = train_data_["text"].map(lambda text: text[3:] if re.sub(".\. ", "", text[:3]) == "" else text)
+        train_data_["summary"] = train_data_["summary"].map(lambda text: text[3:] if re.sub(".\. ", "", text[:3]) == "" else text)
+        # remove parenthesis
+        train_data_["text"] = train_data_["text"].map(lambda text: re.sub("\[[^]]*]|\([^)]*\)", "", text))
+        train_data_["summary"] = train_data_["summary"].map(lambda text: re.sub("\[[^]]*]|\([^)]*\)", "", text))
+        # lower, remove non-korean/english/number/space
+        train_data_["text"] = train_data_["text"].map(lambda text: re.sub(r"[\W]", " ", text.lower()).strip())
+        train_data_["summary"] = train_data_["summary"].map(lambda text: re.sub(r"[\W]", "", text.lower()).strip())
         self.train_data = train_data_
 
     def __len__(self):
@@ -53,8 +63,6 @@ class TrainDataCollator(object):
     def __init__(self):
         self.max_len = get_TextMaxLen()
         self.tokenizer = get_kobart_tokenizer()
-        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.device = torch.device("cpu")
 
     def __call__(self, sequences):
         # expected >> List of {"text": text, "label": summary}
@@ -68,23 +76,14 @@ class TrainDataCollator(object):
         return {'input_ids': tokened_texts.input_ids, "labels": tokened_labels["input_ids"]}
 
     def preprocessing(self, texts: List[str]):
-        # convert to Serise for Easier preprocessing
-        result = pd.Series(texts)
-        # remove Legal provisions (ex - 가. ~~~)
-        result = result.map(lambda text: text[3:] if re.sub(".\. ", "", text[:3]) == "" else text)
-        # remove parenthesis
-        result = result.map(lambda text: re.sub("\[[^]]*]|\([^)]*\)", "", text))
-        # lower, remove non-korean/english/number/space
-        result = result.map(lambda text: re.sub(r"[.,?!`~+=-_*\"']", "", text.lower()))
-        # tokenize
-        tokened_texts = self.tokenizer(result.to_list(), max_length=self.max_len,
-                                       padding="max_length", truncation=True, return_tensors="pt").to(self.device)
+        tokened_texts = self.tokenizer(texts, max_length=self.max_len,
+                                       padding="max_length", truncation=True, return_tensors="pt")
 
         return tokened_texts
 
 
 model = BartForConditionalGeneration.from_pretrained(get_pytorch_kobart_model(),
-                                                     num_labels=len(get_kobart_tokenizer().get_vocab()))  # model hidden_state = 768
+                                                     num_labels=len(get_kobart_tokenizer().get_vocab()))  # vocab_size = 30000
 
 # load, split data (8:2)
 data = pd.read_csv(r"D:\workspace\Git_project\contest\Korean_Summary\data\train_data.csv")
@@ -97,8 +96,8 @@ train_collator = TrainDataCollator()
 args = TrainingArguments(
     output_dir=r"D:\workspace\Git_project\contest\Korean_Summary\model",
     evaluation_strategy=transformers.EvaluationStrategy.STEPS,
-    per_device_train_batch_size=6,
-    per_device_eval_batch_size=6,
+    per_device_train_batch_size=3,
+    per_device_eval_batch_size=3,
     num_train_epochs=4,
     seed=1000,
     load_best_model_at_end=True,
@@ -114,8 +113,3 @@ trainer = Trainer(
     callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
 )
 trainer.train()
-
-
-
-
-
