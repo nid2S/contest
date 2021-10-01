@@ -38,7 +38,7 @@ class TrainDataset(Dataset):
         train_data_ = train_data_.drop_duplicates(["summary"])
         train_data_ = train_data_.drop_duplicates(["text"])
         # # for fast training
-        # train_data_ = train_data_[:int(len(train_data_)/10)]
+        # train_data_ = train_data_.iloc[:int(len(train_data_)/10)]
         # remove Legal provisions (ex - 가. ~~~)
         train_data_["text"] = train_data_["text"].map(lambda text: text[3:] if re.sub(".\. ", "", text[:3]) == "" else text)
         train_data_["summary"] = train_data_["summary"].map(lambda text: text[3:] if re.sub(".\. ", "", text[:3]) == "" else text)
