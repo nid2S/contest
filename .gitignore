@@ -1,3 +1,6 @@
 /KDN/dataset/EmotionalTalkCorpus*.txt
+/KDN/dataset/Train.txt
+/KDN/dataset/Validation.txt
+/KDN/dataset/Test.txt
 *.csv
 *.json

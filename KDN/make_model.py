@@ -1,4 +1,4 @@
-from transformers import TFMobileBertModel, BertTokenizer
+from transformers import TFMobileBertModel
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 import tensorflow as tf
 import pandas as pd
