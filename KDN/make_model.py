@@ -10,13 +10,12 @@ dg = datasetGetter()
 
 # make model
 # batch_size=16/32, lr(Adam)=5/3/2e-5, epoch=3/4
-input_layer = tf.keras.Input(input_shape=dg.max_len)
-bert_layer = TFMobileBertModel.from_pretrained(MODEL_NAME)(input_layer)
-output_layer1 = tf.keras.layers.Dense(6, activation="softmax")(bert_layer)
+bert_layer = TFMobileBertModel.from_pretrained(MODEL_NAME)
+output_layer1 = tf.keras.layers.Dense(6, activation="softmax", input_shape=(768, ))(bert_layer)
 output_layer2 = tf.keras.layers.Dense(60, activation="softmax")(bert_layer)
+model = tf.keras.Model(inputs=bert_layer, outputs=[output_layer1, output_layer2])
 
 optim = tf.keras.optimizers.Adam(learning_rate=2e-5)
-model = tf.keras.Model(inputs=input_layer, outputs=[output_layer1, output_layer2])
 model.compile(optimizer=optim, loss="cetegorical_crossentropy", metrics="accuray")
 hist = model.fit(dg.getTrainDataset(),
                  batch_size=dg.batch_size,

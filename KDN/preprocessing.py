@@ -145,29 +145,31 @@ class datasetGetter:
         train_data = pd.read_csv("./dataset/Train.txt", sep="\t")
         train_x = self.tokenizer.batch_encode_plus(train_data.sent.to_list(), padding="max_length",
                                                    truncation=True, max_length=self.max_len, return_tensors="tf")
-        train_Y1 = to_categorical(train_data["emotion_b"].to_list())
+        # train_Y1 = to_categorical(train_data["emotion_b"].to_list())
         train_Y2 = to_categorical(train_data["emotion_d"].to_list())
 
-        return tf.data.Dataset.from_tensors((train_x, [train_Y1, train_Y2])).shuffle(1000, seed=self.RANDOM_SEED).batch(self.batch_size)
+        # return tf.data.Dataset.from_tensors((train_x, [train_Y1, train_Y2])).shuffle(1000, seed=self.RANDOM_SEED).batch(self.batch_size)
+        return tf.data.Dataset.from_tensor_slices((train_x, train_Y2)).shuffle(1000, seed=self.RANDOM_SEED).batch(self.batch_size)
 
     def getValidationDataset(self) -> tf.data.Dataset:
         val_data = pd.read_csv("./dataset/Validation.txt", sep="\t")
-        val_x = self.tokenizer.batch_encode_plus(val_data.sent.to_list(), padidng="max_lenth",
+        val_x = self.tokenizer.batch_encode_plus(val_data.sent.to_list(), padding="max_length",
                                                  truncation=True, max_length=self.max_len, return_tensors="tf")
 
-        val_Y1 = to_categorical(val_data["emotion_b"].to_list())
+        # val_Y1 = to_categorical(val_data["emotion_b"].to_list())
         val_Y2 = to_categorical(val_data["emotion_d"].to_list())
 
-        return tf.data.Dataset.from_tensors((val_x, [val_Y1, val_Y2])).shuffle(1000, seed=self.RANDOM_SEED).batch(self.batch_size)
+        # return tf.data.Dataset.from_tensors((val_x, [val_Y1, val_Y2])).shuffle(1000, seed=self.RANDOM_SEED).batch(self.batch_size)
+        return tf.data.Dataset.from_tensor_slices((val_x, val_Y2)).shuffle(1000, seed=self.RANDOM_SEED).batch(self.batch_size)
 
     def getTestDataset(self, sent: str = None):
         """ if sent is None, return basic Test Dataset."""
         # data is sentence. case of wanna put document in model, seperate to sentence > get average sentences' vector.
         if sent is None:
             test_data = pd.read_csv("./dataset/Test.txt", sep="\t")
-            test_x = self.tokenizer.batch_encode_plus(test_data.sent.to_list(), padidng="max_lenth",
+            test_x = self.tokenizer.batch_encode_plus(test_data.sent.to_list(), padding="max_length",
                                                       truncation=True, max_length=self.max_len, return_tensors="tf")
-            return tf.data.Dataset.from_tensors((test_x, )).shuffle(1000, seed=self.RANDOM_SEED).batch(self.batch_size)
+            return tf.data.Dataset.from_tensor_slices((test_x, )).shuffle(1000, seed=self.RANDOM_SEED).batch(self.batch_size)
 
         else:
             return self.tokenizer(sent)
