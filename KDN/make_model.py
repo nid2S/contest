@@ -1,25 +1,38 @@
-from transformers import TFMobileBertModel
+from preprocessing import datasetGetter
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from transformers import TFMobileBertModel
+import matplotlib.pyplot as plt
 import tensorflow as tf
 import pandas as pd
 
 MODEL_NAME = "monologg/koelectra-base-v3-discriminator"
-# TODO 전처리 생각, None 채우기
-# get data
+dg = datasetGetter()
 
-input_layer = tf.keras.Input(input_shape=None)
+# make model
+# batch_size=16/32, lr(Adam)=5/3/2e-5, epoch=3/4
+input_layer = tf.keras.Input(input_shape=dg.max_len)
 bert_layer = TFMobileBertModel.from_pretrained(MODEL_NAME)(input_layer)
 output_layer1 = tf.keras.layers.Dense(6, activation="softmax")(bert_layer)
 output_layer2 = tf.keras.layers.Dense(60, activation="softmax")(bert_layer)
 
-optim = tf.keras.optimizers.Adam(learning_rate=1e-5)
+optim = tf.keras.optimizers.Adam(learning_rate=2e-5)
 model = tf.keras.Model(inputs=input_layer, outputs=[output_layer1, output_layer2])
 model.compile(optimizer=optim, loss="cetegorical_crossentropy", metrics="accuray")
-model.fit(x=None,
-          y=[None, None],
-          epochs=None,
-          shuffle=True,
-          validation_data=(None, [None, None]),
-          callbacks=[EarlyStopping(monitor="val_loss", patience=3),
-                     ModelCheckpoint(filepath="./model", monitor='val_accuracy', mode='max', save_best_only=True)])
-model.save("./model/best_model")
+hist = model.fit(dg.getTrainDataset(),
+                 batch_size=dg.batch_size,
+                 epochs=4,
+                 shuffle=True,
+                 validation_data=dg.getValidationDataset(),
+                 callbacks=[EarlyStopping(monitor="val_loss", patience=3),
+                            ModelCheckpoint(filepath="./model/best_model", monitor='val_accuracy', mode='max', save_best_only=True)])
+model.save("./model/last_model")
+
+# show history
+plt.plot(range(1, 5), hist.history["loss"], "r", label="loss")
+plt.plot(range(1, 5), hist.history["accuracy"], "b", label="accuracy")
+plt.xlabel("epoch")
+plt.ylabel("loss/accuracy")
+plt.xticks([1, 2, 3, 4])
+plt.xlim(0.9, 4.1)
+plt.legend()
+plt.show()
