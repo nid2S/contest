@@ -10,3 +10,7 @@
 
 # data
 - [AI hub 감성 대화 말뭉치](https://aihub.or.kr/aidata/7978)
+
+# problems
+1. transfomer bert모델에서 tensorflow layer로 넘어가질 못함 | model.submodules 확인결과 수많은 tf레이어 + transformer레이어로 구성되어있음.
+2. fit에서 발생하는 Unsupported value type BatchEncoding returned by IteratorSpec._serialize
