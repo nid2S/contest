@@ -13,4 +13,5 @@
 
 # problems
 1. transfomer bert모델에서 tensorflow layer로 넘어가질 못함 | model.submodules 확인결과 수많은 tf레이어 + transformer레이어로 구성되어있음.
-2. fit에서 발생하는 Unsupported value type BatchEncoding returned by IteratorSpec._serialize
+2. fit에서 발생하는 Unsupported value type BatchEncoding returned by IteratorSpec._serialize 
+   - transformers모델이 tf데이터셋을 못받음 | bert에선 가능? > batch_encode_plus의 return_tensors="tf"와 딕셔너리 > convert_to_tensor의 차이 확인
