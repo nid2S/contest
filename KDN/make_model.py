@@ -30,7 +30,6 @@ def sentence_classification():
 
             return y1, y2
 
-
     model = SentenceClassifier()
 
     optim = tf.keras.optimizers.Adam(learning_rate=2e-5)
