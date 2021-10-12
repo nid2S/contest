@@ -3,6 +3,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from transformers import TFMobileBertModel
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import numpy as np
 
 MODEL_NAME = "monologg/koelectra-base-v3-discriminator"
 dg = datasetGetter()
@@ -20,17 +21,20 @@ class SentenceClassifier(tf.keras.Model):
 
     def call(self, x, *args, **kwargs):
         x = self.bert_layer(x)
-        x = x.last_hidden_state
+        # x = x.last_hidden_state
+        # x = tf.convert_to_tensor(np.mean(x, axis=1))
+        x = x.pooler_output
         x = self.dense_layer(x)
         y1 = self.output_layer1(x)
         y2 = self.output_layer2(x)
+
         return y1, y2
 
 
 model = SentenceClassifier()
 
 optim = tf.keras.optimizers.Adam(learning_rate=2e-5)
-model.compile(optimizer=optim, loss="categorical_crossentropy", metrics="accuray")
+model.compile(optimizer=optim, loss="categorical_crossentropy", metrics="accuracy")
 hist = model.fit(dg.getTrainDataset(),
                  batch_size=dg.batch_size,
                  epochs=4,

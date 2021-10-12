@@ -12,9 +12,7 @@
 - [AI hub 감성 대화 말뭉치](https://aihub.or.kr/aidata/7978)
 
 # problems
-1. transfomer bert모델에서 tensorflow layer로 넘어가질 못함 | model.submodules 확인결과 수많은 tf레이어 + transformer레이어로 구성되어있음.
-   - 기존 tf모델에 레이어 추가 방법 확인 / 레이어 분해 방법 확인 | Input(input_ids만) > bert 가 가능한지 확인 | SubclassingAPI로 반환값 > Dense가 가능한지 확인
-   1. Input에서 입력을 받을 수 있는지 확인(받는 방식, input_shape등([100,\], (None, 100))
-      - 기본적으로는 keyword argument가 맞지 않게 됨. Subclassing API에선 쌓아봐야 알듯.
-   2. SubclassingAPI확인
-      - call의 입력을 bert model에 넣고, 이 반환값(last_hidden_state, pooler_output)중 원하는걸 뽑아 dense로 전달.
+1. loss function에서 나는 `ValueError: Shapes (None, 6) and (None, 100, 6) are incompatible` 에러.
+   - 예측값의 shape가 (None, 100, 6)이 되버림. 문장분류에 사용되는 pooler_output(첫 토큰의 은닉상태)대신 last_hidden_state를 사용해 생긴 문제.
+   - bert의 반환값은 last_hidden_state(batch_size, sequence_length, hidden_size)와 pooler_output(batch_size, hidden_size).
+   - 공식 문서에 따르면 의미론적 내용에 대한 좋은 요약이 아니며, 전체 은닉상태를 평균하거나 풀링하는게 더 나은 경우가 많다고 함. > 교체?
