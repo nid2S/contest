@@ -3,7 +3,6 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from transformers import TFMobileBertModel
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import pandas as pd
 
 MODEL_NAME = "monologg/koelectra-base-v3-discriminator"
 dg = datasetGetter()
@@ -11,7 +10,7 @@ dg = datasetGetter()
 # make model
 # batch_size=16/32, lr(Adam)=5/3/2e-5, epoch=3/4
 bert_layer = TFMobileBertModel.from_pretrained(MODEL_NAME)
-output_layer1 = tf.keras.layers.Dense(6, activation="softmax", input_shape=(768, ))(bert_layer)
+output_layer1 = tf.keras.layers.Dense(6, activation="softmax")(bert_layer)
 output_layer2 = tf.keras.layers.Dense(60, activation="softmax")(bert_layer)
 model = tf.keras.Model(inputs=bert_layer, outputs=[output_layer1, output_layer2])
 

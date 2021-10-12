@@ -14,8 +14,6 @@
 # problems
 1. transfomer bert모델에서 tensorflow layer로 넘어가질 못함 | model.submodules 확인결과 수많은 tf레이어 + transformer레이어로 구성되어있음.
    - 기존 tf모델에 레이어 추가 방법 확인 / 레이어 분해 방법 확인 | Input(input_ids만) > bert 가 가능한지 확인 | classialAPI로 반환값 > Dense가 가능한지 확인
-
-2. mobile_bert일 때 fit : `Shape must be rank 3 but is rank 4 for '{{node tf_mobile_bert_model/mobilebert/embeddings/Pad}} = 4
-    Pad[T=DT_FLOAT, Tpaddings=DT_INT32](tf_mobile_bert_model/mobilebert/embeddings/strided_slice, 
-    tf_mobile_bert_model/mobilebert/embeddings/Pad/paddings)' with input shapes: [?,88963,100,768], [3,2].`
-   - 결국 데이터셋(from_tensors)이 문제였음이 발견되어 수정함(from_tensor_slices).
+   1. Input에서 입력을 받을 수 있는지 확인(받는 방식, input_shape등(100?))
+   2. classialAPI확인
+   3. 기존 tf모델에서 레이어 추가/분해 방법 확인.
