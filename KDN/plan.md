@@ -11,8 +11,5 @@
 # data
 - [AI hub 감성 대화 말뭉치](https://aihub.or.kr/aidata/7978)
 
-# problems
-1. loss function에서 나는 `ValueError: Shapes (None, 6) and (None, 100, 6) are incompatible` 에러.
-   - 예측값의 shape가 (None, 100, 6)이 되버림. 문장분류에 사용되는 pooler_output(첫 토큰의 은닉상태)대신 last_hidden_state를 사용해 생긴 문제.
-   - bert의 반환값은 last_hidden_state(batch_size, sequence_length, hidden_size)와 pooler_output(batch_size, hidden_size).
-   - 공식 문서에 따르면 의미론적 내용에 대한 좋은 요약이 아니며, 전체 은닉상태를 평균하거나 풀링하는게 더 나은 경우가 많다고 함. > 교체?
+# consider
+- 최초 실행시 특정 공간에 cache후 use_cache=True로 사용
