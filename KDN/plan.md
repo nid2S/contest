@@ -13,13 +13,9 @@
 
 # problems
 1. transfomer bert모델에서 tensorflow layer로 넘어가질 못함 | model.submodules 확인결과 수많은 tf레이어 + transformer레이어로 구성되어있음.
-2. fit에서 발생하는 Unsupported value type BatchEncoding returned by IteratorSpec._serialize 
-   - batch_encode_plus(return_tensors="tf")의 경우 transformers.tokenization_utils_base.BatchEncoding를 반환, 딕셔너리로 변환.
+   - 기존 tf모델에 레이어 추가 방법 확인 / 레이어 분해 방법 확인 | Input(input_ids만) > bert 가 가능한지 확인 | classialAPI로 반환값 > Dense가 가능한지 확인
 
-3. mobile_bert일 때 fit : `Shape must be rank 3 but is rank 4 for '{{node tf_mobile_bert_model/mobilebert/embeddings/Pad}} = 4
+2. mobile_bert일 때 fit : `Shape must be rank 3 but is rank 4 for '{{node tf_mobile_bert_model/mobilebert/embeddings/Pad}} = 4
     Pad[T=DT_FLOAT, Tpaddings=DT_INT32](tf_mobile_bert_model/mobilebert/embeddings/strided_slice, 
     tf_mobile_bert_model/mobilebert/embeddings/Pad/paddings)' with input shapes: [?,88963,100,768], [3,2].`
-4. bert일때 fit : `Dimensions must be equal, but are 512 and 100 for '{{node tf_bert_model/bert/embeddings/position_embeddings/BroadcastTo}} = 
-    BroadcastTo[T=DT_FLOAT, Tidx=DT_INT32](tf_bert_model/bert/embeddings/position_embeddings/strided_slice_1, 
-    tf_bert_model/bert/embeddings/position_embeddings/BroadcastTo/shape)' with input shapes: [512,768], 
-    [4] and with input tensors computed as partial shapes: input[1] = [?,88964,100,768].`
+   - 결국 데이터셋(from_tensors)이 문제였음이 발견되어 수정함(from_tensor_slices).
