@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
 
-def sentence_classification():
+def emotion_classification():
     MODEL_NAME = "monologg/koelectra-base-v3-discriminator"
     dg = datasetGetter()
 
