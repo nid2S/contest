@@ -44,8 +44,10 @@ def sentence_classification():
     model.save("./model/last_model")
 
     # show history
-    plt.plot(range(1, 5), hist.history["loss"], "r", label="loss")
-    plt.plot(range(1, 5), hist.history["accuracy"], "b", label="accuracy")
+    plt.plot(range(1, 5), hist.history["output_1_loss"], "r", label="loss_1")
+    plt.plot(range(1, 5), hist.history["output_2_loss"], "b", label="loss_2")
+    plt.plot(range(1, 5), hist.history["output_1_accuracy"], "r", label="accuracy_1")
+    plt.plot(range(1, 5), hist.history["output_2_accuracy"], "b", label="accuracy_2")
     plt.xlabel("epoch")
     plt.ylabel("loss/accuracy")
     plt.xticks([1, 2, 3, 4])
