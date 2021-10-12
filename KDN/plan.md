@@ -13,7 +13,8 @@
 
 # problems
 1. transfomer bert모델에서 tensorflow layer로 넘어가질 못함 | model.submodules 확인결과 수많은 tf레이어 + transformer레이어로 구성되어있음.
-   - 기존 tf모델에 레이어 추가 방법 확인 / 레이어 분해 방법 확인 | Input(input_ids만) > bert 가 가능한지 확인 | classialAPI로 반환값 > Dense가 가능한지 확인
-   1. Input에서 입력을 받을 수 있는지 확인(받는 방식, input_shape등(100?))
-   2. classialAPI확인
-   3. 기존 tf모델에서 레이어 추가/분해 방법 확인.
+   - 기존 tf모델에 레이어 추가 방법 확인 / 레이어 분해 방법 확인 | Input(input_ids만) > bert 가 가능한지 확인 | SubclassingAPI로 반환값 > Dense가 가능한지 확인
+   1. Input에서 입력을 받을 수 있는지 확인(받는 방식, input_shape등([100,\], (None, 100))
+      - 기본적으로는 keyword argument가 맞지 않게 됨. Subclassing API에선 쌓아봐야 알듯.
+   2. SubclassingAPI확인
+      - call의 입력을 bert model에 넣고, 이 반환값(last_hidden_state, pooler_output)중 원하는걸 뽑아 dense로 전달.

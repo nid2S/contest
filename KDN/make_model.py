@@ -9,13 +9,28 @@ dg = datasetGetter()
 
 # make model
 # batch_size=16/32, lr(Adam)=5/3/2e-5, epoch=3/4
-bert_layer = TFMobileBertModel.from_pretrained(MODEL_NAME)
-output_layer1 = tf.keras.layers.Dense(6, activation="softmax")(bert_layer)
-output_layer2 = tf.keras.layers.Dense(60, activation="softmax")(bert_layer)
-model = tf.keras.Model(inputs=bert_layer, outputs=[output_layer1, output_layer2])
+
+class SentenceClassifier(tf.keras.Model):
+    def __init__(self):
+        super(SentenceClassifier, self).__init__()
+        self.bert_layer = TFMobileBertModel.from_pretrained(MODEL_NAME)
+        self.dense_layer = tf.keras.layers.Dense(512, activation="gelu")
+        self.output_layer1 = tf.keras.layers.Dense(6, activation="softmax")
+        self.output_layer2 = tf.keras.layers.Dense(60, activation="softmax")
+
+    def call(self, x, *args, **kwargs):
+        x = self.bert_layer(x)
+        x = x.last_hidden_state
+        x = self.dense_layer(x)
+        y1 = self.output_layer1(x)
+        y2 = self.output_layer2(x)
+        return y1, y2
+
+
+model = SentenceClassifier()
 
 optim = tf.keras.optimizers.Adam(learning_rate=2e-5)
-model.compile(optimizer=optim, loss="cetegorical_crossentropy", metrics="accuray")
+model.compile(optimizer=optim, loss="categorical_crossentropy", metrics="accuray")
 hist = model.fit(dg.getTrainDataset(),
                  batch_size=dg.batch_size,
                  epochs=4,
