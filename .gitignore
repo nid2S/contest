@@ -2,5 +2,6 @@
 /KDN/dataset/Train.txt
 /KDN/dataset/Validation.txt
 /KDN/dataset/Test.txt
+/Hackathon/data
 *.csv
 *.json
