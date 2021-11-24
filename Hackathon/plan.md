@@ -9,8 +9,3 @@
 - [한국어 대화](https://aihub.or.kr/aidata/85/download)
 - [챗봇 데이터](https://github.com/songys/Chatbot_data)
 - [한국어 음성](https://aihub.or.kr/aidata/105)
-
-- [트위터에서 수집 및 정제한 대화 시나리오](https://aihub.or.kr/opendata/keti-data/recognition-laguage/KETI-02-008) | 연구용도로만 사용가능
-- [한국어 감정 정보가 포함된 연속적 대화 데이터셋](https://aihub.or.kr/opendata/keti-data/recognition-laguage/KETI-02-010) | 연구용도로만 사용가능
-- [한국어 대화 데이터셋](https://aihub.or.kr/opendata/keti-data/recognition-laguage/KETI-02-011) | 연구용도로만 사용가능
-- [웰니스 대화 스크립트 데이터셋](https://aihub.or.kr/keti_data_board/language_intelligence) | 연구용도로만 사용가능
