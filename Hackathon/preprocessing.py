@@ -14,6 +14,7 @@ class Preprocesser:
     def __init__(self):
         self.RANDOM_SEED = 10
         # HyperParam
+        self.lr = 1e-5
         self.batch_size = 16
         self.embedding_dim = 128
         self.input_dim = 0
@@ -25,7 +26,7 @@ class Preprocesser:
         self.validationData = pd.read_csv("./data/validation.txt", sep="\t", names=[])
         self.testData = pd.read_csv("./data/test.txt", sep="\t", names=[])
         # tokenizers
-        self.HFtokenizer = AutoTokenizer.from_pretrained(self.PREMODEL_NAME)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.PREMODEL_NAME)
 
     def getTrainData(self):
         pass
@@ -36,10 +37,10 @@ class Preprocesser:
     def getTestData(self):
         pass
 
-    def id2Token(self, ids: list[int]):
-        pass
+    def encoding(self, text: str):
+        return self.tokenizer.encode(text)
 
-    def preprocessing(self, text: str):
-        pass
+    def decoding(self, ids: list[int]):
+        return self.tokenizer.batch_decode(ids, skip_special_tokens=True)
 
 

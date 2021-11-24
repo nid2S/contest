@@ -8,3 +8,6 @@ try:
     text = sys.argv[1]
 except IndexError:
     text = p.getTestData()
+
+output = model.generate(p.encoding(text))
+print(p.decoding(output))
